@@ -7,6 +7,8 @@ import os
 customtkinter.set_appearance_mode("System")  # Modes: "System" (standard), "Dark", "Light"
 customtkinter.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
 
+rows = ""
+
 #Datenbankpfad
 db_file = 'faq_database.db'
 
@@ -23,7 +25,14 @@ else:
     # Eine Tabelle erstellen
     cursor.execute('''CREATE TABLE faq
                       (id INTEGER PRIMARY KEY, question TEXT, answer TEXT, category TEXT)''')
-    
+    # Daten zur Tabelle hinzufügen
+    cursor.execute("INSERT INTO faq (question, answer, category) VALUES (?, ?, ?)",
+               ("Was ist ein Betriebssystem?", "Ein Betriebssystem ist eine Software, die den Betrieb eines Computers ermöglicht und steuert.", "Betriebssystem"))
+    cursor.execute("INSERT INTO faq (question, answer, category) VALUES (?, ?, ?)",
+               ("Wie kann ich meinen Computer schneller machen?", "Es gibt mehrere Möglichkeiten, um die Leistung Ihres Computers zu verbessern, wie zum Beispiel das Löschen von temporären Dateien, das Deinstallieren unnötiger Programme und das Aktualisieren Ihrer Treiber.", "Computer-Optimierung"))
+    cursor.execute("INSERT INTO faq (question, answer, category) VALUES (?, ?, ?)",
+               ("Wie kann ich mein Passwort ändern?", "Je nachdem, welches Betriebssystem Sie verwenden, können Sie Ihr Passwort normalerweise über die Einstellungen oder Systemsteuerung ändern.", "Passwort-Management"))
+
     # Änderungen speichern und Verbindung schließen
     conn.commit()
     conn.close()
@@ -69,7 +78,8 @@ class App(customtkinter.CTk):
         self.entry = customtkinter.CTkEntry(self, placeholder_text="Suche nach einer bestimmten Frage")
         self.entry.grid(row=3, column=1, columnspan=2, padx=(20, 0), pady=(20, 20), sticky="nsew")
 
-        self.main_button_1 = customtkinter.CTkButton(master=self, text="Suche", fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"))
+        self.main_button_1 = customtkinter.CTkButton(master=self, text="Suche", fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),
+                                                            command=self.get_all_faq)
         self.main_button_1.grid(row=3, column=3, padx=(20, 20), pady=(20, 20), sticky="nsew")
 
         # create textbox
@@ -87,6 +97,7 @@ class App(customtkinter.CTk):
         self.string_input_button = customtkinter.CTkButton(self.tabview.tab("TABS"), text="Neue Frage Hinzufügen",
                                                            command=self.open_input_dialog_event)
         self.string_input_button.grid(row=2, column=0, padx=20, pady=(10, 10))
+
         self.label_tab_2 = customtkinter.CTkLabel(self.tabview.tab("Tab 2"), text="Platzhalter TAB2")
         self.label_tab_2.grid(row=0, column=0, padx=20, pady=20)
 
@@ -94,7 +105,7 @@ class App(customtkinter.CTk):
         # set default values
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")
-        self.textbox.insert("0.0", "Textbox der Datenbank\n\n" + "Hier erscheinen zunächst alle Fragen und Antworten aus der SQLite Datenbank, jedoch muss diese zunächst angegeben werden, damit ein Inhalt hier sichtbar wird\n\n" * 20)
+        self.textbox.insert("0.0","Platzhalter für die SQL Abfrage")
 
 
     def open_input_dialog_event(self):
@@ -110,55 +121,6 @@ class App(customtkinter.CTk):
 
     def sidebar_button_event(self):
         print("Button wurde betätigt")
-
-#SQL Abfrage für alle Daten in der DB
-    def get_all_faq():
-    # Verbindung zur Datenbank herstellen
-        conn = sqlite3.connect(db_file)
-    
-    # Cursor-Objekt erstellen
-        cursor = conn.cursor()
-    
-    # SELECT-Abfrage ausführen
-        cursor.execute('SELECT * FROM faq')
-    
-    # Alle Zeilen abrufen
-        rows = cursor.fetchall()
-    
-    # Verbindung schließen
-        conn.close()
-    
-    # Ergebnis zurückgeben
-        return rows
-    
-    def search_faq():
-    # Verbindung zur Datenbank herstellen
-        conn = sqlite3.connect(db_file)
-    
-    # Cursor-Objekt erstellen
-        cursor = conn.cursor()
-    
-    # Suchbegriff aus dem Entry-Widget abrufen
-        search_term = search_entry.get()
-    
-    # SELECT-Abfrage ausführen
-        if search_term:
-        # Wenn ein Suchbegriff angegeben ist, nach entsprechenden FAQs suchen
-            cursor.execute('SELECT * FROM faq WHERE question LIKE ?', ('%' + search_term + '%',))
-        else:
-        # Wenn kein Suchbegriff angegeben ist, alle FAQs abrufen
-            cursor.execute('SELECT * FROM faq')
-    
-    # Alle Zeilen abrufen
-        rows = cursor.fetchall()
-    
-    # Ergebnis in einem Text-Widget ausgeben
-        result_text.delete('1.0', tk.END)
-        for row in rows:
-            result_text.insert(tk.END, f'{row[0]}. {row[1]}\n\n{row[2]}\n\nCategory: {row[3]}\n\n')
-    
-    # Verbindung schließen
-    conn.close()
 
 if __name__ == "__main__":
     app = App()
