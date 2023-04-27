@@ -51,7 +51,7 @@ class App(customtkinter.CTk):
         super().__init__()
 
         # Konfiguriert den Mainframe des Programmes mit Titel und Pixelgröße des Fensters
-        self.title("FAQ for You.py")
+        self.title("HelpDeskHQ")
         self.geometry(f"{1100}x{580}")
 
         # Konfiguriert das Netz was für das Layout zuständig ist
@@ -65,7 +65,7 @@ class App(customtkinter.CTk):
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Aktionen", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
-        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Button1", command=self.sidebar_button_event)
+        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Login", command=self.sidebar_button_event)
         self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
         self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Button2", command=self.sidebar_button_event)
         self.sidebar_button_2.grid(row=2, column=0, padx=20, pady=10)
@@ -83,31 +83,34 @@ class App(customtkinter.CTk):
         self.scaling_optionemenu.grid(row=8, column=0, padx=20, pady=(10, 20))
 
         # Erstellt den Mainframe für die GUI - Hauptfenster - Hier ist auch die Suchleiste mit dem "Suchen-Button" zu finden
-        self.entry = customtkinter.CTkEntry(self, placeholder_text="Suche nach einer bestimmten Frage")
+        self.entry = customtkinter.CTkEntry(self, placeholder_text="Geben Sie hier eine zu suchende Frage ein... ")
         self.entry.grid(row=3, column=1, columnspan=2, padx=(20, 0), pady=(20, 20), sticky="nsew")
 
-        self.main_button_1 = customtkinter.CTkButton(master=self, text="Suche", fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),
-                                                            command=self.sidebar_button_event)
+        self.main_button_1 = customtkinter.CTkButton(master=self, text="Suchen", fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),
+                                                            command=self.search_database)
         self.main_button_1.grid(row=3, column=3, padx=(20, 20), pady=(20, 20), sticky="nsew")
 
         # Erstellt die große, mittige Textbox
-        self.textbox = customtkinter.CTkTextbox(self, width=250)
+        self.textbox = customtkinter.CTkTextbox(self, width=1200 , height=250)
         self.textbox.grid(row=0, column=1, padx=(20, 0), pady=(20, 0), sticky="nsew")
+        self.textbox.configure(state="normal")
 
-        # Erstellt das Tabfenster mit mehren Mini- Seiten
+        # Erstellt das Tabfenster mit mehren Mini- Seiten - TAB2 vorerst deaktiviert
         self.tabview = customtkinter.CTkTabview(self, width=250)
-        self.tabview.grid(row=0, column=2, padx=(20, 0), pady=(20, 0), sticky="nsew")
+        self.tabview.grid(row=0, column=2, padx=(30, 0), pady=(30, 0), sticky="nsew")
         self.tabview.add("TABS")
-        self.tabview.add("Tab 2")
+        # self.tabview.add("Tab 2")
         self.tabview.tab("TABS").grid_columnconfigure(0, weight=1)  # Hier können die einzelnen Tabs bearbeitet werden
-        self.tabview.tab("Tab 2").grid_columnconfigure(0, weight=1)
+        # self.tabview.tab("Tab 2").grid_columnconfigure(0, weight=1)
 
         self.string_input_button = customtkinter.CTkButton(self.tabview.tab("TABS"), text="Neue Frage stellen",
                                                            command=self.open_input_dialog_event)
         self.string_input_button.grid(row=2, column=0, padx=20, pady=(10, 10))
 
-        self.label_tab_2 = customtkinter.CTkLabel(self.tabview.tab("Tab 2"), text="Platzhalter TAB2")
-        self.label_tab_2.grid(row=0, column=0, padx=20, pady=20)
+# Tabseite 2 zunächst Deaktiviert bis diese benötigt wird
+
+        # self.label_tab_2 = customtkinter.CTkLabel(self.tabview.tab("Tab 2"), text="Platzhalter TAB2")
+        # self.label_tab_2.grid(row=0, column=0, padx=20, pady=20)
 
 
         # Setzt die Standartwerte für die GUI - Hier muss der Inhalt für die Textbox eingeben werden
@@ -115,10 +118,22 @@ class App(customtkinter.CTk):
         self.scaling_optionemenu.set("100%")
         self.textbox.insert("0.0","")
         
-    # Öffnet ein Dialogfenster indem eine Eingabe möglich ist (Verknüpft mit Zeile 97)
+    # Öffnet zwei Dialogfenster - zunächst kann eine Frage eingegeben werden, dann kann das 2. Fenster für die Antwort genutzt werden 
+    # - Anbindung an Datenbank fehlt bzw Eingabe wird nicht als String anerkannt und auch nicht weiterverarbeitet von der SQL-Abfrage
     def open_input_dialog_event(self):
-        frage = customtkinter.CTkInputDialog(text="Mach eine Eingabe:", title="Stelle eine neue Frage")
-        print("Gemachte Eingabe: ", frage.get_input())
+        antwort = customtkinter.CTkInputDialog(text="Gebe eine Antwort ein: ", title="Antwort")
+        antwortInput = antwort.get_input()
+        frage = customtkinter.CTkInputDialog(text="Gebe eine Frage ein", title="Neue Frage stellen")
+        frageInput = frage.get_input()
+        print("Frage: ", frage.get_input())
+        print("Antwort: ",antwort.get_input())
+
+        # Funktion zum schreiben neuer Fragen und Antworten
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO faq (question, answer) VALUES (?, ?)",(frageInput,antwortInput))
+        conn.commit()
+        conn.close()
 
     # Funktion für das ändern des Anzeigemodus (light,dark oder vom System gegebener Modus)
     def change_appearance_mode_event(self, new_appearance_mode: str):
@@ -129,7 +144,8 @@ class App(customtkinter.CTk):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
     
-    #Funktionierdende Abfrage die zunächst alle Einträge in der Datenbank sichtbar macht -> muss noch im allgemeinen Code hinzugefügt werden, sodass beim Starten des Programms alle Daten gezogen werden
+    # Funktionierdende Abfrage die zunächst alle Einträge in der Datenbank sichtbar macht -> muss noch im allgemeinen Code hinzugefügt werden, sodass beim Starten des Programms alle Daten gezogen werden
+    # Aktuell werden alle Daten angezeigt, sobald man auf den Button "Login" klickt
     def sidebar_button_event(self):
         conn = sqlite3.connect('faq_database.db')
         c = conn.cursor()
@@ -142,19 +158,25 @@ class App(customtkinter.CTk):
             self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
             self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
             counter += 1
-            
-    # Unfertige gefilterte Abfrage; hier fehlt die Anbindung an das Suchfeld mit der Anbindung im "Suche-Button"
-    def search_database(query):
-        conn = sqlite3.connect('datenbank.db')
+        conn.close()
+
+    # Unfertige gefilterte Abfrage; hier fehlt das Löschen aller alten Einträge und die verbesserte Darstellung des gefundenen Datensatzes
+    def search_database(self):
+        conn = sqlite3.connect('faq_database.db')
         c = conn.cursor()
     
         # Suchabfrage ausführen
-        c.execute("SELECT question, answer FROM eintraege WHERE question LIKE ?", ('%' + query + '%',))
+        anfrage = self.entry.get()
+        self.entry.delete(0,100)
+
+        # Funktion zum Löschen der ersten Datenbankabfrage, sodass nur noch eine passende Frage dargestellt wird 
+        c.execute("SELECT question, answer FROM faq WHERE question LIKE ?", ('%' + anfrage + '%',))
         rows = c.fetchall()
-    
+        question = rows
+        self.textbox.insert(tkinter.END, question)
+        print("Folgende Eingabe wurde gemacht: ",
+               anfrage)
         conn.close()
-    
-        return rows
 
 # start der GUI
 if __name__ == "__main__":
