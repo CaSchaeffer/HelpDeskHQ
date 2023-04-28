@@ -43,9 +43,22 @@ else:
     
     print('Die Datenbank wurde erstellt')
 
+# Erstellung des TopLevelfensters
+class ToplevelWindow(customtkinter.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.label = customtkinter.CTkLabel(self, text="Die Frage wurde erfolgreich gelöscht!")
+        self.label.pack(padx=20, pady=20)
+
+        # Benachrichtigungsfenster fehlt bislang noch ein Button um die Löschung zu akzeptieren
+        #self.main_dismiss = customtkinter.CTkButton(master=self, text="Ok", fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),
+        #                                                    command=self.dismiss)
+        #self.main_dismiss.grid(row=3, column=3, padx=(20, 20), pady=(20, 20), sticky="nsew")
+    #def dismiss(self):
+        #self.destroy()
 
 
-#Erstellung der GUI
+# Erstellung der GUI
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -65,13 +78,15 @@ class App(customtkinter.CTk):
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Aktionen", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
-        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Neu Laden", command=self.sidebar_button_event)
+        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Daten neu Laden", command=self.sidebar_button_event)
         self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
-        self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Button2", command=self.sidebar_button_event)
-        self.sidebar_button_2.grid(row=2, column=0, padx=20, pady=10)
+
+        # Button 2 unter "Aktionen" vorerst deaktiviert da keine Funktion
+        #self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="-", command=self.sidebar_button_event)
+        #self.sidebar_button_2.grid(row=2, column=0, padx=20, pady=10)
 
         # Hier beginnen die Sonderfunktionen wie das Umstellen des Modus und das Anpassen der Vergrößerung
-        self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Appearance Mode:", anchor="w")
+        self.appearance_mode_label = customtkinter.CTkLabel(self.sidebar_frame, text="Darstellung:", anchor="w")
         self.appearance_mode_label.grid(row=5, column=0, padx=20, pady=(10, 0))
         self.appearance_mode_optionemenu = customtkinter.CTkOptionMenu(self.sidebar_frame, values=["Light", "Dark", "System"],
                                                                        command=self.change_appearance_mode_event)
@@ -98,14 +113,24 @@ class App(customtkinter.CTk):
         # Erstellt das Tabfenster mit mehren Mini- Seiten - TAB2 vorerst deaktiviert
         self.tabview = customtkinter.CTkTabview(self, width=250)
         self.tabview.grid(row=0, column=2, padx=(30, 0), pady=(30, 0), sticky="nsew")
-        self.tabview.add("TABS")
+        self.tabview.add("Menü")
         # self.tabview.add("Tab 2")
-        self.tabview.tab("TABS").grid_columnconfigure(0, weight=1)  # Hier können die einzelnen Tabs bearbeitet werden
+        self.tabview.tab("Menü").grid_columnconfigure(0, weight=1)  # Hier können die einzelnen Tabs bearbeitet werden
         # self.tabview.tab("Tab 2").grid_columnconfigure(0, weight=1)
 
-        self.string_input_button = customtkinter.CTkButton(self.tabview.tab("TABS"), text="Neue Frage stellen",
+        self.string_input_button = customtkinter.CTkButton(self.tabview.tab("Menü"), text="Neue Frage stellen",
                                                            command=self.open_input_dialog_event)
         self.string_input_button.grid(row=2, column=0, padx=20, pady=(10, 10))
+
+        self.string_input_button_2 = customtkinter.CTkButton(self.tabview.tab("Menü"), text="Eine Frage bearbeiten",
+                                                             command=self.edit_database_selected)
+
+        self.string_input_button_2.grid(row=3, column=0, padx=20, pady=(10,10)) 
+
+        self.string_input_button_3 = customtkinter.CTkButton(self.tabview.tab("Menü"), text="Eine Frage löschen",
+                                                             command=self.del_database_entry)
+
+        self.string_input_button_3.grid(row=4, column=0, padx=20, pady=(10,10))
 
 # Tabseite 2 zunächst Deaktiviert bis diese benötigt wird
 
@@ -129,26 +154,22 @@ class App(customtkinter.CTk):
             self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
             counter += 1
         conn.close()
-        # Befehl für leere Textbox deaktiviert
-        #self.textbox.insert("0.0","")
         
     # Öffnet zwei Dialogfenster - zunächst kann eine Frage eingegeben werden, dann kann das 2. Fenster für die Antwort genutzt werden 
-    # - Anbindung an Datenbank fehlt bzw Eingabe wird nicht als String anerkannt und auch nicht weiterverarbeitet von der SQL-Abfrage
     def open_input_dialog_event(self):
-        #antwort = customtkinter.CTkInputDialog(text="Gebe eine Antwort ein: ", title="Antwort")
-        #antwortInput = antwort.get_input()
         frage = customtkinter.CTkInputDialog(text="Gebe eine Frage ein", title="Neue Frage stellen")
         frageInput = frage.get_input()
-        print("Frage: ", frage.get_input())
+        antwort = customtkinter.CTkInputDialog(text="Gebe eine Antwort ein: ", title="Antwort")
+        antwortInput = antwort.get_input()
         print(frageInput)
-        #print("Antwort: ",antwort.get_input())
+        print(antwortInput)
 
         # Funktion zum schreiben neuer Fragen und Antworten - Zunächst deaktiviert da der Input nicht als String anerkannt wird
-        #conn = sqlite3.connect('faq_database.db')
-        #c = conn.cursor()
-        #c.execute("INSERT INTO faq (question, answer) VALUES (?, ?)",(frageInput,antwortInput))
-        #conn.commit()
-        #conn.close()
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO faq (question, answer) VALUES (?, ?)",(frageInput,antwortInput))
+        conn.commit()
+        conn.close()
 
     # Funktion für das ändern des Anzeigemodus (light,dark oder vom System gegebener Modus)
     def change_appearance_mode_event(self, new_appearance_mode: str):
@@ -159,7 +180,7 @@ class App(customtkinter.CTk):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
     
-    # Funktionierdende Abfrage die zunächst alle Einträge in der Datenbank sichtbar macht -> hieraus wir eine Funktion zum neuladen aller bestehenden Daten aus der Datenbank - wichtig nach neuer Frage
+    # Neuladebutton der die Daten nochmals frisch aus der Datenbank abruft - nützlich nach neuen Eingaben
     def sidebar_button_event(self):
         self.textbox.delete("0.0",tkinter.END)
         conn = sqlite3.connect('faq_database.db')
@@ -175,7 +196,7 @@ class App(customtkinter.CTk):
             counter += 1
         conn.close()
 
-    # Unfertige gefilterte Abfrage; hier fehlt das Löschen aller alten Einträge und die verbesserte Darstellung des gefundenen Datensatzes
+    # Filterabfrage die auf den "Suche-Button" reagiert und nach Inhalt in der Suchleite sucht und diese danach leert
     def search_database(self):
         conn = sqlite3.connect('faq_database.db')
         c = conn.cursor()
@@ -184,7 +205,7 @@ class App(customtkinter.CTk):
         anfrage = self.entry.get()
         self.entry.delete(0,100)
         self.textbox.delete("0.0",tkinter.END)
-        c.execute("SELECT id, question, answer FROM faq WHERE question LIKE ?", ('%' + anfrage + '%',))
+        c.execute("SELECT id, question, answer FROM faq WHERE question LIKE ? OR category LIKE ?", ('%' + anfrage + '%','%' + anfrage + '%'))
         rows = c.fetchall()
         for row in rows:
             counter = 1
@@ -195,6 +216,86 @@ class App(customtkinter.CTk):
         print("Eingegebenes Schlagwort: ",
                anfrage)
         conn.close()
+
+    # Funktion zum Auswählen einer Frage nach Nummer (Frage id) welche dann bearbeitet werden kann
+    def edit_database_selected(self):
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+        to_edit = customtkinter.CTkInputDialog(text="Welche Frage soll bearbeitet werden?" + "\n" + "(Fragenummer angeben)", title="Frageauswahl")
+        to_edit_nb = to_edit.get_input()
+        c.execute("SELECT id, question, answer FROM faq WHERE id LIKE ?", ('%' + to_edit_nb + '%',))
+        print(to_edit_nb)
+
+        rows = c.fetchall()
+        for row in rows:
+            counter = 1
+            id, question , answer = row
+            counter += 1
+
+        edit_question = customtkinter.CTkInputDialog(text="Bearbeite die Frage: " + "\n" + f" {question}", title="Frage Nr." + f" {id} " + "bearbeiten")
+        edited_question = edit_question.get_input()
+        if edited_question == "":
+            edited_question = question
+        print(edited_question)
+
+        edit_answer = customtkinter.CTkInputDialog(text="Bearbeite die Antwort: "  + "\n" + f" {answer}", title="Antwort Nr." + f" {id} " + "bearbeiten" )
+        edited_answer = edit_answer.get_input()
+        if edited_answer == "":
+            edited_answer = answer
+
+        print(edited_answer)
+
+        # Schreibbefehl der entweder den alten Wert bei keiner Eingabe nimmt oder den Wert der eingegeben wurde
+        c.execute("UPDATE faq SET question = ?, answer = ? WHERE id LIKE ?", (edited_question, edited_answer, to_edit_nb))
+        conn.commit()
+
+        # FetchAll um die aktualisierten Daten direkt abzubilden
+        self.textbox.delete("0.0",tkinter.END)
+        c.execute('SELECT id, question, answer FROM faq')
+        rows = c.fetchall()
+        for row in rows:
+            counter = 1
+            id, question , answer = row
+            self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
+            self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
+            counter += 1
+        conn.close()
+        print("Frage wurde aktualisiert")
+
+
+        # SQL Befehl zum löschen der ausgewählten Frage
+    def del_database_entry(self):
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+        to_edit = customtkinter.CTkInputDialog(text="Welche Frage soll gelöscht werden?" + "\n" + "(Fragenummer angeben)", title="Frageauswahl zum Löschen")
+        to_edit_nb = to_edit.get_input()
+        c.execute("SELECT id, question, answer FROM faq WHERE id LIKE ?", ('%' + to_edit_nb + '%',))
+        print(to_edit_nb)
+        c.execute("DELETE FROM faq WHERE id LIKE ?",(to_edit_nb))
+        conn.commit        
+        print("Datensatz gelöscht!")
+
+        # Benachrichtigung für den USER - Vorerst deaktiviert da Button noch fehlt
+        #self.toplevel_window = None
+        #if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
+        #    self.toplevel_window = ToplevelWindow(self)  # create window if its None or destroyed
+        #else:
+        #    self.toplevel_window.focus()  # if window exists focus it
+
+        # FetchAll um die aktualisierten Daten direkt abzubilden
+        self.textbox.delete("0.0",tkinter.END)
+        c.execute('SELECT id, question, answer FROM faq')
+        rows = c.fetchall()
+        for row in rows:
+            counter = 1
+            id, question , answer = row
+            self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
+            self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
+            counter += 1
+        conn.close()
+        print("Fragen wurde aktualisiert")
+
+
 
 # start der GUI
 if __name__ == "__main__":
