@@ -28,7 +28,7 @@ else:
     # Eine Tabelle erstellen
     c.execute('''CREATE TABLE faq
                       (id INTEGER PRIMARY KEY, question TEXT, answer TEXT, category TEXT)''')
-    # Daten zur Tabelle hinzufügen
+    # Daten zur Tabelle hinzufügen - id, question, answer, category
     c.execute("INSERT INTO faq (question, answer, category) VALUES (?, ?, ?)",
                ("Was ist ein Betriebssystem?", "Ein Betriebssystem ist eine Software, die den Betrieb eines Computers ermöglicht und steuert.", "Betriebssystem"))
     c.execute("INSERT INTO faq (question, answer, category) VALUES (?, ?, ?)",
@@ -65,7 +65,7 @@ class App(customtkinter.CTk):
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Aktionen", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
-        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Login", command=self.sidebar_button_event)
+        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Neu Laden", command=self.sidebar_button_event)
         self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
         self.sidebar_button_2 = customtkinter.CTkButton(self.sidebar_frame, text="Button2", command=self.sidebar_button_event)
         self.sidebar_button_2.grid(row=2, column=0, padx=20, pady=10)
@@ -116,24 +116,39 @@ class App(customtkinter.CTk):
         # Setzt die Standartwerte für die GUI - Hier muss der Inhalt für die Textbox eingeben werden
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")
-        self.textbox.insert("0.0","")
+
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+        c.execute('SELECT id, question, answer FROM faq')
+        global rows 
+        rows = c.fetchall()
+        for row in rows:
+            counter = 1
+            id, question , answer = row
+            self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
+            self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
+            counter += 1
+        conn.close()
+        # Befehl für leere Textbox deaktiviert
+        #self.textbox.insert("0.0","")
         
     # Öffnet zwei Dialogfenster - zunächst kann eine Frage eingegeben werden, dann kann das 2. Fenster für die Antwort genutzt werden 
     # - Anbindung an Datenbank fehlt bzw Eingabe wird nicht als String anerkannt und auch nicht weiterverarbeitet von der SQL-Abfrage
     def open_input_dialog_event(self):
-        antwort = customtkinter.CTkInputDialog(text="Gebe eine Antwort ein: ", title="Antwort")
-        antwortInput = antwort.get_input()
+        #antwort = customtkinter.CTkInputDialog(text="Gebe eine Antwort ein: ", title="Antwort")
+        #antwortInput = antwort.get_input()
         frage = customtkinter.CTkInputDialog(text="Gebe eine Frage ein", title="Neue Frage stellen")
         frageInput = frage.get_input()
         print("Frage: ", frage.get_input())
-        print("Antwort: ",antwort.get_input())
+        print(frageInput)
+        #print("Antwort: ",antwort.get_input())
 
-        # Funktion zum schreiben neuer Fragen und Antworten
-        conn = sqlite3.connect('faq_database.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO faq (question, answer) VALUES (?, ?)",(frageInput,antwortInput))
-        conn.commit()
-        conn.close()
+        # Funktion zum schreiben neuer Fragen und Antworten - Zunächst deaktiviert da der Input nicht als String anerkannt wird
+        #conn = sqlite3.connect('faq_database.db')
+        #c = conn.cursor()
+        #c.execute("INSERT INTO faq (question, answer) VALUES (?, ?)",(frageInput,antwortInput))
+        #conn.commit()
+        #conn.close()
 
     # Funktion für das ändern des Anzeigemodus (light,dark oder vom System gegebener Modus)
     def change_appearance_mode_event(self, new_appearance_mode: str):
@@ -144,9 +159,9 @@ class App(customtkinter.CTk):
         new_scaling_float = int(new_scaling.replace("%", "")) / 100
         customtkinter.set_widget_scaling(new_scaling_float)
     
-    # Funktionierdende Abfrage die zunächst alle Einträge in der Datenbank sichtbar macht -> muss noch im allgemeinen Code hinzugefügt werden, sodass beim Starten des Programms alle Daten gezogen werden
-    # Aktuell werden alle Daten angezeigt, sobald man auf den Button "Login" klickt
+    # Funktionierdende Abfrage die zunächst alle Einträge in der Datenbank sichtbar macht -> hieraus wir eine Funktion zum neuladen aller bestehenden Daten aus der Datenbank - wichtig nach neuer Frage
     def sidebar_button_event(self):
+        self.textbox.delete("0.0",tkinter.END)
         conn = sqlite3.connect('faq_database.db')
         c = conn.cursor()
         c.execute('SELECT id, question, answer FROM faq')
@@ -168,13 +183,16 @@ class App(customtkinter.CTk):
         # Suchabfrage ausführen
         anfrage = self.entry.get()
         self.entry.delete(0,100)
-
-        # Funktion zum Löschen der ersten Datenbankabfrage, sodass nur noch eine passende Frage dargestellt wird 
-        c.execute("SELECT question, answer FROM faq WHERE question LIKE ?", ('%' + anfrage + '%',))
+        self.textbox.delete("0.0",tkinter.END)
+        c.execute("SELECT id, question, answer FROM faq WHERE question LIKE ?", ('%' + anfrage + '%',))
         rows = c.fetchall()
-        question = rows
-        self.textbox.insert(tkinter.END, question)
-        print("Folgende Eingabe wurde gemacht: ",
+        for row in rows:
+            counter = 1
+            id, question , answer = row
+            self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
+            self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
+            counter += 1
+        print("Eingegebenes Schlagwort: ",
                anfrage)
         conn.close()
 
