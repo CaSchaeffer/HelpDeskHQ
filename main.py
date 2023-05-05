@@ -14,6 +14,9 @@ customtkinter.set_default_color_theme("green")  # Themen: "blue" (standart), "gr
 #Datenbankpfad - Muss im gleichen Ordner wie das Programm liegen -> sonst muss hier der vollständige Dateipfad angegeben werden
 db_file = "faq_database.db"
 
+#Hilfsvariable
+selected_category_filter = ""
+
 #Überprüfung ob Datenbank bereits vorhanden ist
 print("GUI wird gestartet...")
 if os.path.exists(db_file):
@@ -65,6 +68,20 @@ else:
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
+
+        # Zieht erstmalig alle Daten aus der Datenbank und stellt diese für die Textbox bereit - tut dies nicht wenn ein Fehler vorliegt
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+        c.execute('SELECT * FROM faq')
+        global rows 
+        rows = c.fetchall()
+        category_selectable = [""]
+
+
+        for row in rows:
+            counter = 1
+            id, question , answer, category = row
+            category_selectable.append(category)
 
         # Konfiguriert den Mainframe des Programmes mit Titel und Pixelgröße des Fensters
         self.title("HelpDeskHQ - Das FAQ in Sachen Computerfragen")
@@ -156,17 +173,17 @@ class App(customtkinter.CTk):
 
         self.string_input_button_3.grid(row=4, column=0, padx=20, pady=(10,10))
 
+        self.category_options_label = customtkinter.CTkLabel(self.tabview.tab("Menü"), text="Kategorie Filter")
+
+        self.category_options_label.grid(row=5, column=0, padx=20, pady=(10,10))
+
+        self.string_input_options_category = customtkinter.CTkOptionMenu(self.tabview.tab("Menü"), values=category_selectable, command=optionmenu_callback)
+
+        self.string_input_options_category.grid(row=6, column=0, padx=20, pady=(10,10))
+
         # Setzt die Standartwerte für die GUI - Hier muss der Inhalt für die Textbox eingeben werden
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")
-
-
-        # Zieht erstmalig alle Daten aus der Datenbank und stellt diese für die Textbox bereit - tut dies nicht wenn ein Fehler vorliegt
-        conn = sqlite3.connect('faq_database.db')
-        c = conn.cursor()
-        c.execute('SELECT * FROM faq')
-        global rows 
-        rows = c.fetchall()
         
         self.textbox.insert(tkinter.END, "Fragen und Antworten des HelpDeskHQ's" +"\n\n") 
         for row in rows:
@@ -190,7 +207,6 @@ class App(customtkinter.CTk):
             counter += 1
         conn.close()
 
-        
     # Funktion für das ändern des Anzeigemodus (light,dark oder vom System gegebener Modus)
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
@@ -244,19 +260,21 @@ class App(customtkinter.CTk):
         # Suchabfrage ausführen für eine bestimmte Frage oder Kategorie
         search_request = self.entry.get()
         self.entry.delete(0,100)
-        c.execute("SELECT id, question, answer FROM faq WHERE question LIKE ? OR category LIKE ?", ('%' + search_request+ '%','%' + search_request + '%'))
+        filtered_request = selected_category_filter
+        c.execute("SELECT * FROM faq WHERE question LIKE ? AND category LIKE ?", ('%' + search_request+ '%','%' + filtered_request + '%'))
         rows = c.fetchall()
 
         # Darstellen des gefundenen Datensatz mit löschung der vorherigen Eingabe
         self.textbox.delete("0.0",tkinter.END)
-        self.textbox.insert(tkinter.END, "Suchtreffer für dein gesuchtes Schlagwort:" +"\n"+f"{search_request}"+ "\n\n") 
+
+        self.textbox.insert(tkinter.END, "Suchtreffer für dein gesuchtes Schlagwort oder Kategorie:" +"\n"+f"{search_request}"+ "\n\n") 
         for row in rows:
             counter = 1
             id, question , answer, category = row
             self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
             self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
             self.textbox.insert(tkinter.END, "Kategorie: " +  "\n\n" + category + "\n\n\n")
-            counter += 1
+        counter += 1
         print("Eingegebenes Schlagwort: ",
                search_request)
         conn.close()
@@ -265,15 +283,27 @@ class App(customtkinter.CTk):
     def open_input_dialog_event(self):
         new_question = customtkinter.CTkInputDialog(text="Gebe eine Frage ein", title="Neue Frage stellen")
         new_question_Input = new_question.get_input()
-        print(new_question_Input)
+        if new_question_Input=="":
+            print("Keine Frage getätigt!")
+            pass
+        else:
+            print(new_question_Input)
 
         new_answer = customtkinter.CTkInputDialog(text="Gebe eine Antwort ein: ", title="Antwort der zur Frage" + f'{new_question_Input}')
         new_answer_Input = new_answer.get_input()
-        print(new_answer_Input)
+        if new_answer_Input=="":
+            print("Keine Antwort getätigt!")
+            pass
+        else:        
+            print(new_answer_Input)
 
         new_category = customtkinter.CTkInputDialog(text="Gebe eine Kategorie der Frage an", title="")
         new_category_Input = new_category.get_input()
-        print(new_category_Input)
+        if new_category_Input=="":
+            print("Keine Eingabe getätigt!")
+            pass
+        else:
+            print(new_category_Input)
 
         # Funktion zum schreiben neuer Fragen und Antworten - prüft ob überhaupt eine Eingabe gemacht wird da es sonst zu einem Fehler in der Datenbank kommt
         if new_question_Input=="":
@@ -288,6 +318,8 @@ class App(customtkinter.CTk):
                     conn.close()
         
         # FetchAll um die aktualisierten Daten direkt abzubilden
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
         c.execute('SELECT * FROM faq')
         rows = c.fetchall()
 
@@ -328,6 +360,7 @@ class App(customtkinter.CTk):
         edited_question = edit_question.get_input()
         if edited_question == "":
             edited_question = question
+            print("Der alte Wert für die Frage wurde übernommen!")
         print(edited_question)
 
         # Dialogfenster zur Antwort die zu bearbeiten ist
@@ -335,6 +368,7 @@ class App(customtkinter.CTk):
         edited_answer = edit_answer.get_input()
         if edited_answer == "":
             edited_answer = answer
+            print("Der alte Wert für die Antwort wurde übernommen!")
         print(edited_answer)
 
         # Dialogfenster zur Kategorie die zu bearbeiten ist
@@ -342,6 +376,7 @@ class App(customtkinter.CTk):
         edited_category = edit_categoy.get_input()
         if edited_category == "":
             edited_category = category
+            print("Der alte Wert für die Kategorie wurde übernommen!")
         print(edited_category)
 
         # Schreibbefehl der entweder den alten Wert bei keiner Eingabe nimmt oder den Wert der gemachten Eingabe
@@ -375,13 +410,19 @@ class App(customtkinter.CTk):
         to_edit_nb = to_edit.get_input()
 
         # Auswahl des Datensatz indem die Nummer übereinstimmt
-        c.execute("SELECT id, question, answer FROM faq WHERE id LIKE ?", ('%' + to_edit_nb + '%',))
-        print("Datensatz Nr.: " + to_edit_nb + " wird gelöscht...")
+        if to_edit =="":
+            print("Datensatz konnte nicht gefunden werden... da keine Nummer angegeben wurde")
+        else:    
+            c.execute("SELECT id, question, answer FROM faq WHERE id LIKE ?", ('%' + to_edit_nb + '%',))
+            print("Datensatz Nr.: " + to_edit_nb + " wird gelöscht...")
 
         # SQL-Befehl zum löschen des ausgewählten Datensatz
-        c.execute("DELETE FROM faq WHERE id LIKE ?",(to_edit_nb))
-        conn.commit        
-        print("Datensatz erfolgreich gelöscht!")
+        if to_edit =="":
+            print("Vorgang wird abgebrochen...")
+        else:   
+            c.execute("DELETE FROM faq WHERE id LIKE ?",(to_edit_nb))
+            conn.commit        
+            print("Datensatz erfolgreich gelöscht!")
 
         # FetchAll-Funktion um die aktualisierten Daten direkt abzubilden
         self.textbox.delete("0.0",tkinter.END)
@@ -405,6 +446,11 @@ class App(customtkinter.CTk):
         #else:
         #    self.toplevel_window.focus()  # if window exists focus it
 
+def optionmenu_callback(choices):
+    print("Ausgewählte Kategorie: " + choices)
+    global selected_category_filter
+    selected_category_filter = choices
+    
 
 # start der GUI
 if __name__ == "__main__":
