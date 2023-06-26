@@ -1,4 +1,5 @@
 # Benötigte Module
+# Benötigte Module
 import tkinter # GUI
 import tkinter.messagebox # GUI Fenster in Fenster
 import customtkinter # Verbessertes Design für die GUI
@@ -14,9 +15,6 @@ customtkinter.set_default_color_theme("green")  # Themen: "blue" (standart), "gr
 #Datenbankpfad - Muss im gleichen Ordner wie das Programm liegen -> sonst muss hier der vollständige Dateipfad angegeben werden
 db_file = "faq_database.db"
 
-#Hilfsvariable
-selected_category_filter = ""
-
 #Überprüfung ob Datenbank bereits vorhanden ist
 print("GUI wird gestartet...")
 if os.path.exists(db_file):
@@ -31,37 +29,69 @@ else:
     c = conn.cursor()
     
     # Eine Tabelle erstellen
-    c.execute('''CREATE TABLE faq
-                      (id INTEGER PRIMARY KEY, question TEXT, answer TEXT, category TEXT)''')
-    
-    # Daten zur Tabelle hinzufügen - Felder: id, question, answer, category
-    c.execute("INSERT INTO faq (question, answer, category) VALUES (?, ?, ?)",
-               ("Was ist ein Betriebssystem?", "Ein Betriebssystem ist eine Software, die den Betrieb eines Computers ermöglicht und steuert.", "Betriebssystem"))
-    c.execute("INSERT INTO faq (question, answer, category) VALUES (?, ?, ?)",
-               ("Wie kann ich meinen Computer schneller machen?", "Es gibt mehrere Möglichkeiten, um die Leistung Ihres Computers zu verbessern, wie zum Beispiel das Löschen von temporären Dateien, das Deinstallieren unnötiger Programme und das Aktualisieren Ihrer Treiber.", "Computer-Optimierung"))
-    c.execute("INSERT INTO faq (question, answer, category) VALUES (?, ?, ?)",
-               ("Wie kann ich mein Passwort ändern?", "Je nachdem, welches Betriebssystem Sie verwenden, können Sie Ihr Passwort normalerweise über die Einstellungen oder Systemsteuerung ändern.", "Passwort-Management"))
+    c.execute('''CREATE TABLE questions (
+	                                        id integer PRIMARY KEY AUTOINCREMENT,
+	                                        question text,
+	                                        answer text,
+	                                        date datetime,
+	                                        q_id integer,
+                                            FOREIGN KEY (q_id) REFERENCES categorys(category_id)
+                                            )''')
 
+    
+    # Daten zur Tabelle questions hinzufügen - Felder: question, answer, date, q_id
+    c.execute("INSERT INTO questions (question, answer, date, q_id) VALUES (?, ?, ?, ?)",
+                ('Was versteht man unter Big Data?', 'Unter Big Data versteht man die Verarbeitung und Analyse von großen Datenmengen, die herkömmliche Datenverarbeitungs- und Analysemethoden überfordern würden.', '2023-05-08', 1))
+    c.execute("INSERT INTO questions (question, answer, date, q_id) VALUES (?, ?, ?, ?)",
+               ('Was ist eine API?', 'Eine API (Application Programming Interface) ist eine Schnittstelle, die es ermöglicht, dass verschiedene Anwendungen miteinander kommunizieren und Daten austauschen können.', '2023-05-08', 2))
+    c.execute("INSERT INTO questions (question, answer, date, q_id) VALUES (?, ?, ?, ?)",
+               ('Was ist Cloud Computing?', 'Cloud Computing bezeichnet die Bereitstellung von IT-Ressourcen (z.B. Rechenleistung, Speicherplatz) über das Internet, anstatt sie lokal auf einem eigenen Rechner oder Server zu betreiben.', '2023-05-08', 3))
+    c.execute("INSERT INTO questions (question, answer, date, q_id) VALUES (?, ?, ?, ?)",
+                ('Was ist künstliche Intelligenz?', 'Künstliche Intelligenz bezeichnet die Fähigkeit von Maschinen, Aufgaben auszuführen, die normalerweise menschliche Intelligenz erfordern würden.', '2023-06-26', 4))
+    c.execute("INSERT INTO questions (question, answer, date, q_id) VALUES (?, ?, ?, ?)",
+                ('Was ist Blockchain?', 'Die Blockchain ist eine dezentrale und transparente Datenbank, die Informationen in Blöcken speichert und eine sichere Verkettung dieser Blöcke gewährleistet.', '2023-06-26', 5))
+    c.execute("INSERT INTO questions (question, answer, date, q_id) VALUES (?, ?, ?, ?)",
+                ('Was ist das Internet der Dinge (IoT)?', 'Das Internet der Dinge bezieht sich auf die Vernetzung von physischen Geräten und Objekten, die über Sensoren und Netzwerkverbindungen miteinander kommunizieren und Daten austauschen können.', '2023-06-26', 6))
+    c.execute("INSERT INTO questions (question, answer, date, q_id) VALUES (?, ?, ?, ?)",
+                ('Was ist Virtual Reality (VR)?', 'Virtual Reality ist eine computergenerierte Umgebung, die es Benutzern ermöglicht, in eine immersive Erfahrung einzutauchen und interaktiv mit virtuellen Objekten und Szenarien zu interagieren.', '2023-06-26', 7))
+    c.execute("INSERT INTO questions (question, answer, date, q_id) VALUES (?, ?, ?, ?)",
+                ('Was ist Augmented Reality (AR)?', 'Augmented Reality bezieht sich auf die erweiterte Darstellung der realen Welt durch computergenerierte Informationen und virtuelle Elemente, die in Echtzeit in die Umgebung des Benutzers eingeblendet werden.', '2023-06-26', 8))
+    c.execute("INSERT INTO questions (question, answer, date, q_id) VALUES (?, ?, ?, ?)",
+                ('Was ist Machine Learning?', 'Machine Learning bezieht sich auf die Entwicklung von Algorithmen und Modellen, die es Computern ermöglichen, aus Erfahrungen zu lernen und automatisch Entscheidungen zu treffen, ohne explizit programmiert zu sein.', '2023-06-26', 9))
+    c.execute("INSERT INTO questions (question, answer, date, q_id) VALUES (?, ?, ?, ?)",
+                ('Was ist Data Mining?', 'Data Mining bezeichnet den Prozess der Entdeckung von Mustern, Zusammenhängen und Informationen aus großen Datenmengen, um nützliche Erkenntnisse zu gewinnen.', '2023-06-26', 10))
+
+    # Daten zur Tabelle categorys hinzufügen - Felder: category_id, category
+    c.execute('''CREATE TABLE categorys (
+	                                        category_id integer PRIMARY KEY AUTOINCREMENT,
+	                                        category text
+                                            )''')
+    c.execute("INSERT INTO categorys (category_id, category) VALUES (?, ?)",
+                (1, 'Big Data'))
+    c.execute("INSERT INTO categorys (category_id, category) VALUES (?, ?)",
+                (2, 'API'))
+    c.execute("INSERT INTO categorys (category_id, category) VALUES (?, ?)",
+                (3, 'Cloud Computing'))
+    c.execute("INSERT INTO categorys (category_id, category) VALUES (?, ?)",
+                (4, 'Künstliche Intelligenz'))
+    c.execute("INSERT INTO categorys (category_id, category) VALUES (?, ?)",
+                (5, 'Blockchain'))
+    c.execute("INSERT INTO categorys (category_id, category) VALUES (?, ?)",
+                (6, 'Internet of Things (IoT)'))
+    c.execute("INSERT INTO categorys (category_id, category) VALUES (?, ?)",
+                (7, 'Virtual Reality (VR)'))
+    c.execute("INSERT INTO categorys (category_id, category) VALUES (?, ?)",
+                (8, 'Augmented Reality (AR)'))
+    c.execute("INSERT INTO categorys (category_id, category) VALUES (?, ?)",
+                (9, 'Machine Learning'))
+    c.execute("INSERT INTO categorys (category_id, category) VALUES (?, ?)",
+                (10, 'Data Mining'))        
     # Änderungen speichern und Verbindung schließen
     conn.commit()
     conn.close()
     
     print("Keine bestehende Datenbank unter dem angegebenen Dateipfad gefunden....")
     print("Eine neue Datenbank wurde erfolgreich erstellt!")
-
-# Erstellung des TopLevelfensters
-#class ToplevelWindow(customtkinter.CTkToplevel):
-    #def __init__(self, *args, **kwargs):
-        #super().__init__(*args, **kwargs)
-        #self.label = customtkinter.CTkLabel(self, text="Die Frage wurde erfolgreich gelöscht!")
-        #self.label.pack(padx=20, pady=20)
-
-        # Benachrichtigungsfenster fehlt bislang noch ein Button um die Löschung zu akzeptieren
-        #self.main_dismiss = customtkinter.CTkButton(master=self, text="Ok", fg_color="transparent", border_width=2, text_color=("gray10", "#DCE4EE"),
-        #                                                    command=self.dismiss)
-        #self.main_dismiss.grid(row=3, column=3, padx=(20, 20), pady=(20, 20), sticky="nsew")
-    #def dismiss(self):
-        #self.destroy()
 
 
 # Erstellung der GUI
@@ -72,16 +102,22 @@ class App(customtkinter.CTk):
         # Zieht erstmalig alle Daten aus der Datenbank und stellt diese für die Textbox bereit - tut dies nicht wenn ein Fehler vorliegt
         conn = sqlite3.connect('faq_database.db')
         c = conn.cursor()
-        c.execute('SELECT * FROM faq')
-        global rows 
-        rows = c.fetchall()
-        category_selectable = [""]
+
+        # SQL-Abfrage zum Abrufen aller Werte aus beiden Tabellen
+        sql = "SELECT category FROM categorys"
+        c.execute(sql)
+        global row 
+        row = c.fetchall()
+        global category_filter_options
+        category_filter_options = []
+        for row in row:
+            counter = 0
+            category= row
+            category1 = category[counter]
+            category_filter_options.append(f"{category1}")
+            counter+=1
 
 
-        for row in rows:
-            counter = 1
-            id, question , answer, category = row
-            category_selectable.append(category)
 
         # Konfiguriert den Mainframe des Programmes mit Titel und Pixelgröße des Fensters
         self.title("HelpDeskHQ - Das FAQ in Sachen Computerfragen")
@@ -100,7 +136,7 @@ class App(customtkinter.CTk):
         # Erstellt Label "Aktionen" und Button zum Neuladen
         self.logo_label = customtkinter.CTkLabel(self.sidebar_frame, text="Aktionen", font=customtkinter.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=3, column=0, padx=20, pady=(10, 0))
-        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Daten neu Laden", anchor="n",
+        self.sidebar_button_1 = customtkinter.CTkButton(self.sidebar_frame, text="Daten neu Laden",
                                                              command=self.sidebar_button_event)
         self.sidebar_button_1.grid(row=5, column=0, padx=20, pady=(10,0))
 
@@ -136,11 +172,6 @@ class App(customtkinter.CTk):
                                                             command=self.search_database)
         self.main_button_1.grid(row=3, column=3, padx=(20, 20), pady=(20, 20), sticky="nsew")
 
-        # Kontextlabel zur Begrüßung und zur Erklärung - Vorerst Deaktiviert - Verschiebung der Textbox nötig
-        # info_context = ("Herzlich Willkommen!" + "\n" + "Im HelpDeskHQ können sowohl neue Fragen eingetragen werden als auch bestehende Fragen "+ "\n"+ "gesucht, bearbeitet oder gelöscht werden. Viel Spaß wünscht Projekt-Gruppe Cool :)")
-        # self.infolabel_1 = customtkinter.CTkLabel(self,width=100, text=f"{info_context}")
-        # self.infolabel_1.grid(row=0,column=1,padx=(30,0),pady=(30,0),sticky="nsew")
-
         # Erstellt die große, mittige Textbox
         self.textbox = customtkinter.CTkTextbox(self, width=450 , height=450)
         self.textbox.grid(row=0, column=1, padx=(30, 0), pady=(30, 0), sticky="nsew")
@@ -159,54 +190,52 @@ class App(customtkinter.CTk):
         # self.label_tab_2.grid(row=0, column=0, padx=20, pady=20)
 
         # Erstellt die einzelnen Buttons auf der Menüseite 1
-        self.string_input_button = customtkinter.CTkButton(self.tabview.tab("Menü"), text="Neue Frage stellen",
-                                                           command=self.open_input_dialog_event)
+        self.string_input_button = customtkinter.CTkButton(self.tabview.tab("Menü"), text="Neue Frage stellen",command=self.open_toplevel_new)
         self.string_input_button.grid(row=2, column=0, padx=20, pady=(10, 10))
 
-        self.string_input_button_2 = customtkinter.CTkButton(self.tabview.tab("Menü"), text="Eine Frage bearbeiten",
-                                                             command=self.edit_database_selected)
+        self.string_input_button_2 = customtkinter.CTkButton(self.tabview.tab("Menü"), text="Eine Frage bearbeiten", command= self.open_toplevel_edit)
 
         self.string_input_button_2.grid(row=3, column=0, padx=20, pady=(10,10)) 
 
-        self.string_input_button_3 = customtkinter.CTkButton(self.tabview.tab("Menü"), text="Eine Frage löschen",
-                                                             command=self.del_database_entry)
+        self.string_input_button_3 = customtkinter.CTkButton(self.tabview.tab("Menü"), text="Eine Frage löschen", command= self.open_toplevel_delete)
 
         self.string_input_button_3.grid(row=4, column=0, padx=20, pady=(10,10))
 
-        self.category_options_label = customtkinter.CTkLabel(self.tabview.tab("Menü"), text="Kategorie Filter")
+        self.string_dropdown_label= customtkinter.CTkLabel(self.tabview.tab("Menü"), text="Kategorien filtern: ")
+        self.string_dropdown_label.grid(row=5, column=0, padx=20, pady=(10,10))
 
-        self.category_options_label.grid(row=5, column=0, padx=20, pady=(10,10))
-
-        self.string_input_options_category = customtkinter.CTkOptionMenu(self.tabview.tab("Menü"), values=category_selectable, command=optionmenu_callback)
-
-        self.string_input_options_category.grid(row=6, column=0, padx=20, pady=(10,10))
+        self.string_dropdown = customtkinter.CTkOptionMenu(self.tabview.tab("Menü"),  dynamic_resizing=False,
+                                                        values=category_filter_options)
+        self.string_dropdown.grid(row=6, column=0, padx=20, pady=(20, 10))
 
         # Setzt die Standartwerte für die GUI - Hier muss der Inhalt für die Textbox eingeben werden
         self.appearance_mode_optionemenu.set("Dark")
         self.scaling_optionemenu.set("100%")
         
         self.textbox.insert(tkinter.END, "Fragen und Antworten des HelpDeskHQ's" +"\n\n") 
-        for row in rows:
-            counter = 1
-            id, question , answer, category = row
-            try:
-                self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
-                self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
-                self.textbox.insert(tkinter.END, "Kategorie: " +  "\n\n" + category + "\n\n\n") 
-            except:
-                self.textbox.insert(tkinter.END,"Fehlerhafter Datensatz in Datensatz Nr.: "+f"{id}")
-                if question=="":
-                    print("Frage fehlerhaft oder leer")
-                elif answer=="":
-                    print("Antwort fehlerhaft oder leer")
-                elif category=="":
-                    print("Kategore fehlerhaft oder leer")
-                else:
-                    print("Datenbankfehler - Datenbank sollte gelöscht werden")
-                pass
-            counter += 1
-        conn.close()
+        
+        sql = "SELECT * FROM questions"
 
+       # Ausführen der Abfrage
+        c.execute(sql,)
+
+        # Ergebnisse abrufen
+        row = c.fetchall()
+        self.textbox.delete("0.0",tkinter.END)
+        for row in row:
+            counter = 0
+            id, question , answer, date, q_id = row          
+            self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
+            self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
+            c.execute("SELECT category FROM categorys WHERE category_id = '"+str(q_id)+"'")
+            category = c.fetchone()
+            category1 = category[counter]
+            self.textbox.insert(tkinter.END, "Kategorie ID: " + F"{q_id}"+ "\n\n"+ category1  + "\n\n")
+            self.textbox.insert(tkinter.END,"Erstellt am: " + date + "\n\n")  
+            counter += 1
+        conn.close()           
+
+        
     # Funktion für das ändern des Anzeigemodus (light,dark oder vom System gegebener Modus)
     def change_appearance_mode_event(self, new_appearance_mode: str):
         customtkinter.set_appearance_mode(new_appearance_mode)
@@ -218,239 +247,445 @@ class App(customtkinter.CTk):
     
     # Neuladebutton der die Daten nochmals frisch aus der Datenbank abruft - nützlich nach neuen Eingaben
     def sidebar_button_event(self):
-        # Verbindung zur Datenbank
-        conn = sqlite3.connect('faq_database.db')
-        c = conn.cursor()
-        c.execute('SELECT * FROM faq')
 
-        # Globale rows Funktion damit hiermit weitergearbeitet werden kann - auserhalb der Funktion
-        global rows 
-        rows = c.fetchall()
-
-        # FetchAll-Funktion um die aktualisierten Daten direkt abzubilden - Fehlerhafte Datensätze können hierdurch Sichtbar gemacht werden        
-        self.textbox.delete("0.0",tkinter.END)
-        self.textbox.insert(tkinter.END, "Fragen und Antworten des HelpDeskHQ's" +"\n\n") 
-        for row in rows:
-            counter = 1
-            id, question , answer, category = row
-            try:               
-                self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
-                self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
-                self.textbox.insert(tkinter.END, "Kategorie: " +  "\n\n" + category + "\n\n\n") 
-            except:
-                self.textbox.insert(tkinter.END,"Fehlerhafter Datensatz in Datensatz Nr.: "+f"{id}")
-                if question=="":
-                    print("Frage fehlerhaft oder leer")
-                elif answer=="":
-                    print("Antwort fehlerhaft oder leer")
-                elif category=="":
-                    print("Kategore fehlerhaft oder leer")
-                else:
-                    print("Datenbankfehler - Datenbank sollte gelöscht werden")
-                pass
-            counter += 1
         conn.close()
 
-    # Filterabfrage die auf den "Suche-Button" reagiert und nach Inhalt in der Suchleite sucht und diese danach leert
+    # Filterabfrage die auf den "Suche-Button" reagiert
     def search_database(self):
         #Verbindung mit der Datenbank
         conn = sqlite3.connect('faq_database.db')
         c = conn.cursor()
-    
+
         # Suchabfrage ausführen für eine bestimmte Frage oder Kategorie
         search_request = self.entry.get()
+        category_filter_option_selected = self.string_dropdown.get()
         self.entry.delete(0,100)
-        filtered_request = selected_category_filter
-        c.execute("SELECT * FROM faq WHERE question LIKE ? AND category LIKE ?", ('%' + search_request+ '%','%' + filtered_request + '%'))
-        rows = c.fetchall()
 
-        # Darstellen des gefundenen Datensatz mit löschung der vorherigen Eingabe
-        self.textbox.delete("0.0",tkinter.END)
+        if search_request !="":
+            # SQL-Abfrage zum Suchen in allen Feldern der Tabelle
+            sql = "SELECT * FROM questions WHERE question LIKE ? OR answer LIKE ? OR date LIKE ?"
 
-        self.textbox.insert(tkinter.END, "Suchtreffer für dein gesuchtes Schlagwort oder Kategorie:" +"\n"+f"{search_request}"+ "\n\n") 
-        for row in rows:
-            counter = 1
-            id, question , answer, category = row
-            self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
-            self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
-            self.textbox.insert(tkinter.END, "Kategorie: " +  "\n\n" + category + "\n\n\n")
-        counter += 1
-        print("Eingegebenes Schlagwort: ",
-               search_request)
-        conn.close()
+            # Platzhalterwerte für die Suchbegriffe angeben
+            suchbegriff_wildcard = f"%{search_request}%"
+            werte = (suchbegriff_wildcard, suchbegriff_wildcard, suchbegriff_wildcard)
 
-    # Öffnet drei Dialogfenster - zunächst kann eine Fragedialog,Antwortdialog,Kategoriedialog
-    def open_input_dialog_event(self):
-        new_question = customtkinter.CTkInputDialog(text="Gebe eine Frage ein", title="Neue Frage stellen")
-        new_question_Input = new_question.get_input()
-        if new_question_Input=="":
-            print("Keine Frage getätigt!")
-            pass
-        else:
-            print(new_question_Input)
+            # Ausführen der Abfrage
+            c.execute(sql, werte)
 
-        new_answer = customtkinter.CTkInputDialog(text="Gebe eine Antwort ein: ", title="Antwort der zur Frage" + f'{new_question_Input}')
-        new_answer_Input = new_answer.get_input()
-        if new_answer_Input=="":
-            print("Keine Antwort getätigt!")
-            pass
-        else:        
-            print(new_answer_Input)
+            # Ergebnisse abrufen
+            row = c.fetchall()
+            self.textbox.delete("0.0",tkinter.END)
+            for row in row:
+                id, question , answer, date, q_id = row
+                self.textbox.insert(tkinter.END, "Treffer im HelpDeskHQ für folgende Sucheingabe:  "+ search_request +"\n\n")            
+                self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
+                self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
+                self.textbox.insert(tkinter.END, "Kategorie ID: " + F"{q_id}"+ "\n\n" + category_filter_option_selected + "\n\n")
+                self.textbox.insert(tkinter.END,"Erstellt am: " + date + "\n\n")  
+            conn.close()
 
-        new_category = customtkinter.CTkInputDialog(text="Gebe eine Kategorie der Frage an", title="")
-        new_category_Input = new_category.get_input()
-        if new_category_Input=="":
-            print("Keine Eingabe getätigt!")
-            pass
-        else:
-            print(new_category_Input)
+        elif category_filter_option_selected !="":
 
-        # Funktion zum schreiben neuer Fragen und Antworten - prüft ob überhaupt eine Eingabe gemacht wird da es sonst zu einem Fehler in der Datenbank kommt
-        if new_question_Input=="":
-            if new_answer_Input=="":
-                if new_category_Input=="":
-                    pass
-                else:
-                    conn = sqlite3.connect('faq_database.db')
-                    c = conn.cursor()
-                    c.execute("INSERT INTO faq (question, answer, category) VALUES (?, ?,?)",(new_question_Input,new_answer_Input,new_category_Input))
-                    conn.commit()
-                    conn.close()
+            # SQL-Abfrage zum Abrufen des passenden Datensatzes
+            sql = '''SELECT * FROM questions WHERE q_id = (
+                    SELECT category_id FROM categorys WHERE category = ?
+                    )'''
+
+            # Platzhalterwert für die ausgewählte Kategorie angeben
+            werte = (category_filter_option_selected,)
+
+            # Ausführen der Abfrage
+            c.execute(sql, werte)
+            row = c.fetchall()
+            self.textbox.delete("0.0",tkinter.END)
+            for row in row:
+                id, question , answer, date, q_id = row
+                self.textbox.insert(tkinter.END, "Treffer im HelpDeskHQ für folgende Sucheingabe:  "+ search_request+ category_filter_option_selected +"\n\n")            
+                self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
+                self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
+                self.textbox.insert(tkinter.END, "Kategorie ID: " + F"{q_id}"+ "\n\n" + category_filter_option_selected + "\n\n")
+                self.textbox.insert(tkinter.END,"Erstellt am: " + date + "\n\n")  
+            conn.close()
+
+    def open_toplevel_new(self):
+        #Verbindung mit der Datenbank
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+
+
+        self.toplevel_window_new = ToplevelWindow_new(self)
+
+    def open_toplevel_edit(self):
+        #Verbindung mit der Datenbank
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+
+
+        self.toplevel_window_edit = ToplevelWindow_edit(self)
+
+    def open_toplevel_delete(self):
+        #Verbindung mit der Datenbank
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+
+
+        self.toplevel_window_delete = ToplevelWindow_delete(self)
+
+class ToplevelWindow_new(customtkinter.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title("HelpDeskHQ - Eine Frage eingeben")
+        self.geometry("950x500")
         
-        # FetchAll um die aktualisierten Daten direkt abzubilden
+        # Textfelder (3 Stück) zum Bearbeiten der ausgewählten Frage
+        self.grid()
+
+        # Erstelle das erste Textfeld
+        self.label1 = customtkinter.CTkLabel(self, text="Neue Frage eingeben:")
+        self.label1.grid(row=3, column=0, padx=10, pady=5, sticky="nsew")
+        self.textbox1 = customtkinter.CTkTextbox(self, height=30, width=900)
+        self.textbox1.grid(row=4, column=0, padx=10, pady=10)
+
+        # Erstelle das zweite Textfeld
+        self.label2 = customtkinter.CTkLabel(self, text="Neue Antwort eingeben:")
+        self.label2.grid(row=5, column=0, padx=10, pady=5, sticky="nsew")
+        self.textbox2 = customtkinter.CTkTextbox(self, height=30, width=900)
+        self.textbox2.grid(row=6, column=0, padx=10, pady=10)
+
+        # Button zum Speichern der Änderungen
+        self.save_button = customtkinter.CTkButton(self, text="Speichern", command= self.open_toplevel_confirm_new)
+        self.save_button.grid(row=10, column=0, padx=10, pady=10)
+
+        # Dropdownmenü zur Auswahl
+        self.string_dropdown = customtkinter.CTkOptionMenu(self,  dynamic_resizing=False,
+                                                        values=category_filter_options)
+        self.string_dropdown.grid(row=8, column=0, padx=20, pady=(20, 10))
+
+        # Button zum Verwerfen der Änderungen
+        self.cancel_button = customtkinter.CTkButton(self, text="Abbrechen", command= self.dismiss_changes_new)
+        self.cancel_button.grid(row=9, column=0, padx=10, pady=10)
+
+
+    def open_toplevel_confirm_new(self):
+        global textbox1_answer1
+        textbox1_answer1= self.textbox1.get("0.0","end")
+        global textbox2_answer2
+        textbox2_answer2= self.textbox2.get("0.0","end")
+        global textbox3_answer3
+        textbox3_answer3= self.string_dropdown.get()
         conn = sqlite3.connect('faq_database.db')
         c = conn.cursor()
-        c.execute('SELECT * FROM faq')
-        rows = c.fetchall()
+        # Schreibbefehl der entweder den alten Wert bei keiner Eingabe nimmt oder den Wert der gemachten Eingabe
+        c.execute("INSERT INTO questions (question,answer) VALUES (?,?)", (textbox1_answer1, textbox2_answer2))
+        conn.commit()
+        c.execute("SELECT id FROM questions WHERE question = ?", (textbox1_answer1))
+        question_number =c.fetchone
+        c.execute("SELECT category_id FROM categorys WHERE category = ?", (textbox3_answer3,))
+        result = c.fetchone()
+        c.execute("UPDATE questions SET q_id = ? WHERE id LIKE ?",(f"%{result}%", f"%{question_number}%"))
+        conn.commit()
+        ToplevelWindow_new.destroy(self)
 
+    def dismiss_changes_new(self):
+        # Hier kannst du den Code einfügen, um die Änderungen zu verwerfen
+        ToplevelWindow_new.destroy(self)
+        print("Vorgang abgebrochen")
+    
+ 
+class ToplevelWindow_edit(customtkinter.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title("HelpDeskHQ - Eine Frage bearbeiten")
+        self.geometry("950x500")
 
-        self.textbox.delete("0.0",tkinter.END)
-        self.textbox.insert(tkinter.END, "Fragen und Antworten des HelpDeskHQ's" +"\n\n")
-        for row in rows:
-            counter = 1
-            id, question , answer, category = row
-            self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
-            self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
-            self.textbox.insert(tkinter.END, "Kategorie: " +  "\n\n" + category + "\n\n\n")
+        sql = "SELECT question FROM questions"
+        # Zieht erstmalig alle Daten aus der Datenbank und stellt diese für die Textbox bereit - tut dies nicht wenn ein Fehler vorliegt
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+       # Ausführen der Abfrage
+        c.execute(sql)
+
+        # Ergebnisse abrufen
+        row = c.fetchall()
+        question_filter_options=[]
+        for row in row:
+            counter = 0
+            question = row          
+            question1 = question[counter]
+            question_filter_options.append(f"{question1}")
             counter += 1
         conn.close()
-        print("Frage wurde aktualisiert")
 
-    # Funktion zum Auswählen einer Frage nach Nummer (Frage id) welche dann bearbeitet werden kann
-    def edit_database_selected(self):
-        # Verbindung zur Datenbank
+        # Dropdown zum Auswählen der Frage
+        self.string_dropdown = customtkinter.CTkOptionMenu(self,height=40 ,width=650, dynamic_resizing=False, values=question_filter_options)
+        self.string_dropdown.grid(row=1, column=0, padx=20, pady=(20, 30),sticky="nsew")
+        
+        # Bestätigungsbutton für die ausgewählte Frage
+        self.confirm_button = customtkinter.CTkButton(self, text="Bestätigen", command=self.select_to_edit)
+        self.confirm_button.grid(row=2, column=0, padx=20, pady=10)
+        
+        # Textfelder (3 Stück) zum Bearbeiten der ausgewählten Frage
+        self.grid()
+
+        # Erstelle das erste Textfeld
+        self.label1 = customtkinter.CTkLabel(self, text="Frage:")
+        self.label1.grid(row=3, column=0, padx=10, pady=5, sticky="nsew")
+        self.textbox1 = customtkinter.CTkTextbox(self, height=30, width=900)
+        self.textbox1.grid(row=4, column=0, padx=10, pady=10)
+
+        # Erstelle das zweite Textfeld
+        self.label2 = customtkinter.CTkLabel(self, text="Antwort:")
+        self.label2.grid(row=5, column=0, padx=10, pady=5, sticky="nsew")
+        self.textbox2 = customtkinter.CTkTextbox(self, height=30, width=900)
+        self.textbox2.grid(row=6, column=0, padx=10, pady=10)
+
+        # Erstelle das dritte Textfeld
+        self.label3 = customtkinter.CTkLabel(self, text="Kategorie:")
+        self.label3.grid(row=7, column=0, padx=10, pady=5, sticky="nsew")
+        self.textbox3 = customtkinter.CTkTextbox(self, height=10, width=500)
+        self.textbox3.grid(row=8, column=0, padx=10, pady=5)
+
+        # Button zum Speichern der Änderungen
+        self.save_button = customtkinter.CTkButton(self, text="Speichern", command= self.save_changes)
+        self.save_button.grid(row=10, column=0, padx=10, pady=10)
+
+        # Dropdownmenü für die Auswahl der Kategorie - Admineingabe
+
+
+        # Button zum Verwerfen der Änderungen
+        self.cancel_button = customtkinter.CTkButton(self, text="Abbrechen", command= self.dismiss_changes)
+        self.cancel_button.grid(row=9, column=0, padx=10, pady=10)
+
+    def select_to_edit(self):
+        question_filter_option_selected = self.string_dropdown.get()
+        print(question_filter_option_selected)
+
+        # Zieht erstmalig alle Daten aus der Datenbank und stellt diese für die Textbox bereit - tut dies nicht wenn ein Fehler vorliegt
         conn = sqlite3.connect('faq_database.db')
         c = conn.cursor()
 
-        # Abfrage zum Selektieren einer Frage nach der Nummer 1-...-999
-        to_edit = customtkinter.CTkInputDialog(text="Welche Frage soll bearbeitet werden?" + "\n" + "(Fragenummer angeben)", title="Frageauswahl")
-        to_edit_nb = to_edit.get_input()
+        # SQL-Abfrage zum Abrufen des passenden Datensatzes
+        sql = "SELECT * FROM questions WHERE question LIKE ?"
 
-        # Greift den Datensatz mit der passenden Nummer ab
-        c.execute("SELECT * FROM faq WHERE id LIKE ?", ('%' + to_edit_nb + '%',))
-        print(to_edit_nb)
+        # Platzhalterwert für die ausgewählte Kategorie angeben
+        werte = (question_filter_option_selected,)
+
+        # Ausführen der Abfrage
+        c.execute(sql, werte)
         rows = c.fetchall()
+
+        # Textboxen leeren
+        self.textbox1.delete("1.0", tkinter.END)
+        self.textbox2.delete("1.0", tkinter.END)
+        self.textbox3.delete("1.0", tkinter.END)
+
         for row in rows:
-            counter = 1
-            id, question , answer, category = row
-            counter += 1
+            id, question, answer, date, q_id = row
 
-        # Dialogfenster zur Frage die zu bearbeiten ist
-        edit_question = customtkinter.CTkInputDialog(text="Bearbeite die Frage: " + "\n" + f" {question}", title="Frage zu Nr." + f" {id} " + "bearbeiten")
-        edited_question = edit_question.get_input()
-        if edited_question == "":
-            edited_question = question
-            print("Der alte Wert für die Frage wurde übernommen!")
-        print(edited_question)
+            self.textbox1.insert(tkinter.END, question+"\n")
+            self.textbox2.insert(tkinter.END, answer+"\n")
 
-        # Dialogfenster zur Antwort die zu bearbeiten ist
-        edit_answer = customtkinter.CTkInputDialog(text="Bearbeite die Antwort: "  + "\n" + f" {answer}", title="Antwort zu Nr." + f" {id} " + "bearbeiten" )
-        edited_answer = edit_answer.get_input()
-        if edited_answer == "":
-            edited_answer = answer
-            print("Der alte Wert für die Antwort wurde übernommen!")
-        print(edited_answer)
+            c.execute("SELECT category FROM categorys WHERE category_id LIKE ?", (q_id,))
+            category = c.fetchone()
+            if category:
+                category1 = category[0]
+                self.textbox3.insert(tkinter.END, category1)
+        conn.close()
 
-        # Dialogfenster zur Kategorie die zu bearbeiten ist
-        edit_categoy = customtkinter.CTkInputDialog(text="Bearbeite die Kategorie: "  + "\n" + f" {category}", title="Kategorie zu Nr." + f" {id} " + "bearbeiten" )
-        edited_category = edit_categoy.get_input()
-        if edited_category == "":
-            edited_category = category
-            print("Der alte Wert für die Kategorie wurde übernommen!")
-        print(edited_category)
+    def save_changes(self):
+        question_filter_option_selected = self.string_dropdown.get()
+        global textbox1_answer1
+        textbox1_answer1= self.textbox1.get("0.0","end")
+        global textbox2_answer2
+        textbox2_answer2= self.textbox2.get("0.0","end")
+        global textbox3_answer3
+        textbox3_answer3= self.textbox3.get("0.0","end")
 
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+        to_edit_question = question_filter_option_selected
+
+        # Zieht erstmalig alle Daten aus der Datenbank und stellt diese für die Textbox bereit - tut dies nicht wenn ein Fehler vorliegt
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+        # Greift den Datensatz mit der passenden Nummer ab
+        c.execute("SELECT q_id FROM questions WHERE question LIKE ?", ('%' + to_edit_question + '%',))
+        row=c.fetchone()
+        row=row[0]
+        print(f"{row}")
         # Schreibbefehl der entweder den alten Wert bei keiner Eingabe nimmt oder den Wert der gemachten Eingabe
-        c.execute("UPDATE faq SET question = ?, answer = ?, category = ? WHERE id LIKE ?", (edited_question, edited_answer, edited_category, to_edit_nb))
+        c.execute("UPDATE questions SET question = ?, answer = ? WHERE id LIKE ?", (textbox1_answer1, textbox2_answer2, f"%{row}%"))
+        conn.commit()
+        c.execute("UPDATE categorys SET category = ? WHERE category_id LIKE ?",(textbox3_answer3, f"%{row}%"))
+        row= c.fetchone()  
         conn.commit()
 
-        # FetchAll-Funktion um die aktualisierten Daten direkt abzubilden
-        self.textbox.delete("0.0",tkinter.END)
-        c.execute('SELECT * FROM faq')
-        rows = c.fetchall()
-        self.textbox.insert(tkinter.END, "Fragen und Antworten des HelpDeskHQ's" +"\n\n")
-        for row in rows:
-            counter = 1
-            id, question , answer, category = row
-            self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
-            self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
-            self.textbox.insert(tkinter.END, "Kategorie: " +  "\n\n" + category + "\n\n\n")
+    def dismiss_changes(self):
+        ToplevelWindow_delete.destroy(self)
+        print("Vorgang abgebrochen")   
+ 
+class ToplevelWindow_delete(customtkinter.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title("HelpDeskHQ - Eine Frage löschen")
+        self.geometry("950x500")
+
+        sql = "SELECT question FROM questions"
+        # Zieht erstmalig alle Daten aus der Datenbank und stellt diese für die Textbox bereit - tut dies nicht wenn ein Fehler vorliegt
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+       # Ausführen der Abfrage
+        c.execute(sql)
+
+        # Ergebnisse abrufen
+        row = c.fetchall()
+        question_filter_options=[]
+        for row in row:
+            counter = 0
+            question = row          
+            question1 = question[counter]
+            question_filter_options.append(f"{question1}")
             counter += 1
         conn.close()
-        print("Frage wurde aktualisiert")
 
+        # Dropdown zum Auswählen der Frage
+        self.string_dropdown = customtkinter.CTkOptionMenu(self,height=40 ,width=650, dynamic_resizing=False, values=question_filter_options)
+        self.string_dropdown.grid(row=1, column=0, padx=20, pady=(20, 30),sticky="nsew")
+        
+        # Bestätigungsbutton für die ausgewählte Frage
+        self.confirm_button = customtkinter.CTkButton(self, text="Bestätigen", command=self.select_to_edit)
+        self.confirm_button.grid(row=2, column=0, padx=20, pady=10)
+        
+        # Textfelder (3 Stück) zum Bearbeiten der ausgewählten Frage
+        self.grid()
 
-    # SQL Befehl zum löschen der ausgewählten Frage
-    def del_database_entry(self):
-        # Verbindung zur Datenbank
+        # Erstelle das erste Textfeld
+        self.label1 = customtkinter.CTkLabel(self, text="Frage:")
+        self.label1.grid(row=3, column=0, padx=10, pady=5, sticky="nsew")
+        self.textbox1 = customtkinter.CTkTextbox(self, height=30, width=900)
+        self.textbox1.grid(row=4, column=0, padx=10, pady=10)
+
+        # Erstelle das zweite Textfeld
+        self.label2 = customtkinter.CTkLabel(self, text="Antwort:")
+        self.label2.grid(row=5, column=0, padx=10, pady=5, sticky="nsew")
+        self.textbox2 = customtkinter.CTkTextbox(self, height=30, width=900)
+        self.textbox2.grid(row=6, column=0, padx=10, pady=10)
+
+        # Erstelle das dritte Textfeld
+        self.label3 = customtkinter.CTkLabel(self, text="Kategorie:")
+        self.label3.grid(row=7, column=0, padx=10, pady=5, sticky="nsew")
+        self.textbox3 = customtkinter.CTkTextbox(self, height=10, width=500)
+        self.textbox3.grid(row=8, column=0, padx=10, pady=5)
+
+        # Button zum Speichern der Änderungen
+        self.save_button = customtkinter.CTkButton(self, text="Löschen", command= self.open_toplevel_confirm)
+        self.save_button.grid(row=10, column=0, padx=10, pady=10)
+
+        # Button zum Verwerfen der Änderungen
+        self.cancel_button = customtkinter.CTkButton(self, text="Abbrechen", command= self.dismiss_changes)
+        self.cancel_button.grid(row=9, column=0, padx=10, pady=10)
+
+    def select_to_edit(self):
+        question_filter_option_selected = self.string_dropdown.get()
+        print(question_filter_option_selected)
+
+        # Zieht erstmalig alle Daten aus der Datenbank und stellt diese für die Textbox bereit - tut dies nicht wenn ein Fehler vorliegt
         conn = sqlite3.connect('faq_database.db')
         c = conn.cursor()
 
-        # Dialogfenster zur Auswahl der Frage
-        to_edit = customtkinter.CTkInputDialog(text="Welche Frage soll gelöscht werden?" + "\n" + "(Fragenummer angeben)", title="Frageauswahl zum Löschen")
-        to_edit_nb = to_edit.get_input()
+        # SQL-Abfrage zum Abrufen des passenden Datensatzes
+        sql = "SELECT * FROM questions WHERE question LIKE ?"
 
-        # Auswahl des Datensatz indem die Nummer übereinstimmt
-        if to_edit =="":
-            print("Datensatz konnte nicht gefunden werden... da keine Nummer angegeben wurde")
-        else:    
-            c.execute("SELECT id, question, answer FROM faq WHERE id LIKE ?", ('%' + to_edit_nb + '%',))
-            print("Datensatz Nr.: " + to_edit_nb + " wird gelöscht...")
+        # Platzhalterwert für die ausgewählte Kategorie angeben
+        werte = (question_filter_option_selected,)
 
-        # SQL-Befehl zum löschen des ausgewählten Datensatz
-        if to_edit =="":
-            print("Vorgang wird abgebrochen...")
-        else:   
-            c.execute("DELETE FROM faq WHERE id LIKE ?",(to_edit_nb))
-            conn.commit        
-            print("Datensatz erfolgreich gelöscht!")
-
-        # FetchAll-Funktion um die aktualisierten Daten direkt abzubilden
-        self.textbox.delete("0.0",tkinter.END)
-        c.execute('SELECT id, question, answer FROM faq')
+        # Ausführen der Abfrage
+        c.execute(sql, werte)
         rows = c.fetchall()
-        self.textbox.insert(tkinter.END, "Fragen und Antworten des HelpDeskHQ's" +"\n\n")
+
+        # Textboxen leeren
+        self.textbox1.delete("1.0", tkinter.END)
+        self.textbox2.delete("1.0", tkinter.END)
+        self.textbox3.delete("1.0", tkinter.END)
+
         for row in rows:
-            counter = 1
-            id, question , answer, category = row
-            self.textbox.insert(tkinter.END, f"{id}" + ". " "Frage: "+ "\n\n" + question + "\n\n")
-            self.textbox.insert(tkinter.END, "Antwort: " +  "\n\n" + answer + "\n\n")
-            self.textbox.insert(tkinter.END, "Kategorie: " +  "\n\n" + category + "\n\n\n")
-            counter += 1
+            id, question, answer, date, q_id = row
+
+            self.textbox1.insert(tkinter.END, question+"\n")
+            self.textbox2.insert(tkinter.END, answer+"\n")
+
+            c.execute("SELECT category FROM categorys WHERE category_id LIKE ?", (q_id,))
+            category = c.fetchone()
+            if category:
+                category1 = category[0]
+                self.textbox3.insert(tkinter.END, category1)
+
         conn.close()
-        print("Fragen wurde aktualisiert")
+    def open_toplevel_confirm(self):
+        global question_filter_option_selected
+        question_filter_option_selected = self.string_dropdown.get()
+        global textbox1_answer1
+        textbox1_answer1= self.textbox1.get("0.0","end")
+        global textbox2_answer2
+        textbox2_answer2= self.textbox2.get("0.0","end")
+        global textbox3_answer3
+        textbox3_answer3= self.textbox3.get("0.0","end")
+        ToplevelWindow_confirm_delete(self)  
 
-        # Benachrichtigung für den USER - Vorerst deaktiviert da Button noch fehlt
-        #self.toplevel_window = None
-        #if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
-        #    self.toplevel_window = ToplevelWindow(self)  # create window if its None or destroyed
-        #else:
-        #    self.toplevel_window.focus()  # if window exists focus it
-
-def optionmenu_callback(choices):
-    print("Ausgewählte Kategorie: " + choices)
-    global selected_category_filter
-    selected_category_filter = choices
+    def dismiss_changes(self):
+        # Hier kannst du den Code einfügen, um die Änderungen zu verwerfen
+        ToplevelWindow_delete.destroy(self)
+        print("Vorgang abgebrochen")
     
+class ToplevelWindow_confirm_delete(customtkinter.CTkToplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title("HelpDeskHQ - Bestätigen des Löschens")
+        self.geometry("400x150")
+
+        # Zieht erstmalig alle Daten aus der Datenbank und stellt diese für die Textbox bereit - tut dies nicht wenn ein Fehler vorliegt
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+
+        # Bestätigungslabel
+        self.confirm_label = customtkinter.CTkLabel(self,text="Bist du sicher das du die Auswahl löschen möchtest?")
+        self.confirm_label.grid(row=0, column=0, padx=20,pady=10)
+        # Bestätigungsbutton für die ausgewählte Frage
+        self.confirm_button = customtkinter.CTkButton(self, text="Löschen", command=self.delete_entry)
+        self.confirm_button.grid(row=1, column=0, padx=20, pady=10)
+        # Abbrechbutton
+        self.confirm_button = customtkinter.CTkButton(self, text="Abbrechen", command=self.dismiss_changes)
+        self.confirm_button.grid(row=2, column=0, padx=20, pady=10)
+
+        ToplevelWindow_confirm_delete.focus(self)
+
+    def delete_entry(self):
+        conn = sqlite3.connect('faq_database.db')
+        c = conn.cursor()
+        to_edit_question = question_filter_option_selected
+
+        # Greift den Datensatz mit der passenden Nummer ab
+        c.execute("SELECT q_id FROM questions WHERE question LIKE ?", ('%' + to_edit_question + '%',))
+        row=c.fetchone()
+        row=row[0]
+        print(f"{row}")
+        # Schreibbefehl der entweder den alten Wert bei keiner Eingabe nimmt oder den Wert der gemachten Eingabe
+        c.execute("DELETE FROM questions WHERE question = ?, answer = ? WHERE id LIKE ?", (textbox1_answer1, textbox2_answer2, f"%{row}%"))
+        conn.commit()
+        c.execute("DELETE FROM categorys WHERE category = ? WHERE category_id LIKE ?",(textbox3_answer3, f"%{row}%"))
+        row= c.fetchone()  
+        conn.commit()
+        
+        ToplevelWindow_confirm_delete.destroy(self)
+        print("Eintrag gelöscht")
+
+        conn.close()
+       
+    def dismiss_changes(self):
+        # Hier kannst du den Code einfügen, um die Änderungen zu verwerfen
+        ToplevelWindow_confirm_delete.destroy(self)
+        print("Vorgang abgebrochen")
+         
 
 # start der GUI
 if __name__ == "__main__":
